@@ -1,0 +1,46 @@
+---
+title: "samplingtwo"
+author: "Taylor Greenberg Goldy and Daniela Teran"
+date: "3/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(googlesheets4)
+library(janitor)
+library(tidyverse)
+sheets_deauth()
+# There is nothing wrong with reading in, and cleaning up, your data in the
+# setup R code chunk. But, to be honest, I am just doing this here because I
+# couldn't figure out how to turn off the message from read_sheet.
+x <- read_sheet(ss =  "14HmwN2cEVAJHupuehCuLdwG9BXtR3COrxDgaaylLhkA") %>% 
+  clean_names() %>%
+  mutate(perc_red = red / (red + white))
+```
+
+```{r}
+x
+```
+
+
+```{r}
+# I don't really like this plot. There are only 26 allowed values, from 0% to
+# 100% in increments of 4%. So, I should be able to see separate points. But I
+# could never get that to work, even using geom_bar() and other tricks. 
+# Ahh. Now I look at the data and see that there are several impossible (?)
+# points: 8.7%, 19%, 25% and 77%. Is that bad data?
+x %>% 
+  ggplot(aes(perc_red)) +
+    geom_histogram(bins = 20) +
+    labs(title = "Percentage of Red Beads Drawn",
+        subtitle = "Should we be suspicious of those outliers?",
+        caption = "Classroom data from 2020-03-03",
+        x = "Percentage of Red Beads Out of 25 Drawn",
+        y = "Count") 
+```
+
+```{r}
+
+```
+

@@ -42,5 +42,13 @@ x %>%
 
 ```{r}
 
+# First we need an urn
+
+urn <- tibble(bean_ID = 1:10000,
+              color = c(rep("Red", 2000), rep("White", 8000)))
+  
+# Then we need to simulate one sample from the urn
+
+#
 ```
 

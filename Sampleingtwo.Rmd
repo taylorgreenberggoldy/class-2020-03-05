@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = FALSE)
 library(googlesheets4)
 library(janitor)
 library(tidyverse)
+library(infer)
+
 sheets_deauth()
 # There is nothing wrong with reading in, and cleaning up, your data in the
 # setup R code chunk. But, to be honest, I am just doing this here because I
@@ -44,11 +46,56 @@ x %>%
 
 # First we need an urn
 
-urn <- tibble(bean_ID = 1:10000,
+my_urn <- tibble(bean_ID = 1:10000,
               color = c(rep("Red", 2000), rep("White", 8000)))
   
 # Then we need to simulate one sample from the urn
 
-#
+
+my_urn %>% 
+  rep_sample_n(size = 25, reps = 1) %>%
+  summarize(red_sum = sum(color == "Red")) %>%
+  mutate(perc_red = red_sum/25)
+
+# Then we do this X times.
+
+sample <- my_urn %>% 
+  rep_sample_n(size = 25, reps = 51) %>%
+  group_by(replicate) %>%
+  summarize(red_sum = sum(color == "Red")) %>%
+  mutate(perc_red = red_sum/25)
+
+# Then we plot
+
+sample %>%
+  ggplot(aes(perc_red)) +
+    geom_histogram(bins = 20) +
+    labs(title = "Percentage of Red Beads Drawn",
+        subtitle = "Should we be suspicious of those outliers?",
+        caption = "Classroom data from 2020-03-03",
+        x = "Percentage of Red Beads Out of 25 Drawn",
+        y = "Count") 
+
+# Let's make a function which does one run of what we did in the class
+
+simulate_class <- function(urn){
+  urn %>% 
+  rep_sample_n(size = 25, reps = 51) %>%
+  group_by(replicate) %>%
+  summarize(red_sum = sum(color == "Red")) %>%
+  mutate(perc_red = red_sum/25)
+}
+
+```
+
+```{r}
+
+many_class <- tibble(sim_ID = 1:3,
+                     results = map(sim_ID,
+                       ~ simulate_class(my_urn))) 
+
+many_class[[2]][[2]] %>%
+  ggplot(aes(perc_red)) +
+    geom_histogram(bins = 20)
 ```
 
